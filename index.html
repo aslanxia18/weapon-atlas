@@ -1,0 +1,1410 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>快搜武器图鉴 终极版</title>
+  <style>
+    :root {
+      --bg: #040404;
+      --bg-soft: #0d0d0d;
+      --panel: rgba(255, 255, 255, 0.05);
+      --panel-strong: rgba(255, 255, 255, 0.08);
+      --line: rgba(255, 255, 255, 0.09);
+      --line-strong: rgba(255, 255, 255, 0.18);
+      --text: #f8f7f2;
+      --muted: #b9b0a0;
+      --gold: #d7ad63;
+      --gold-soft: rgba(215, 173, 99, 0.12);
+      --ice: #89d9ef;
+      --ice-soft: rgba(137, 217, 239, 0.12);
+      --shadow: 0 26px 80px rgba(0, 0, 0, 0.5);
+      --hero: radial-gradient(circle at top left, rgba(215, 173, 99, 0.18), transparent 30%),
+        radial-gradient(circle at top right, rgba(137, 217, 239, 0.18), transparent 36%),
+        linear-gradient(180deg, rgba(255, 255, 255, 0.03), rgba(255, 255, 255, 0));
+    }
+
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      color: var(--text);
+      background:
+        linear-gradient(180deg, rgba(255, 255, 255, 0.03), transparent 28%),
+        radial-gradient(circle at 18% 12%, rgba(215, 173, 99, 0.12), transparent 20%),
+        radial-gradient(circle at 85% 0%, rgba(137, 217, 239, 0.08), transparent 28%),
+        var(--bg);
+      font-family: "Avenir Next", "PingFang SC", "Microsoft YaHei", sans-serif;
+    }
+
+    a { color: inherit; text-decoration: none; }
+    img { display: block; width: 100%; }
+    button, input, select { font: inherit; }
+
+    .topbar {
+      position: sticky;
+      top: 0;
+      z-index: 30;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 18px;
+      padding: 18px 28px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+      background: rgba(4, 4, 4, 0.88);
+      backdrop-filter: blur(18px);
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+
+    .brand-mark {
+      width: 46px;
+      height: 46px;
+      border-radius: 14px;
+      display: grid;
+      place-items: center;
+      border: 1px solid rgba(215, 173, 99, 0.34);
+      background: linear-gradient(145deg, rgba(215, 173, 99, 0.18), rgba(137, 217, 239, 0.08));
+      color: var(--gold);
+      font-weight: 800;
+      letter-spacing: 0.08em;
+    }
+
+    .brand-title {
+      margin: 0;
+      font-family: "Baskerville", "Times New Roman", "STSong", serif;
+      font-size: 24px;
+    }
+
+    .brand-subtitle {
+      margin: 4px 0 0;
+      color: var(--muted);
+      font-size: 12px;
+    }
+
+    .nav {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+    }
+
+    .nav button,
+    .category-pill,
+    .filter-pill {
+      min-height: 38px;
+      padding: 0 14px;
+      border-radius: 999px;
+      border: 1px solid transparent;
+      background: transparent;
+      color: var(--muted);
+      cursor: pointer;
+      transition: 0.2s ease;
+    }
+
+    .nav button:hover,
+    .nav button.active,
+    .category-pill:hover,
+    .category-pill.active,
+    .filter-pill:hover,
+    .filter-pill.active {
+      color: var(--text);
+      border-color: rgba(215, 173, 99, 0.42);
+      background: rgba(215, 173, 99, 0.1);
+    }
+
+    .profile-wrap {
+      position: relative;
+    }
+
+    .profile-trigger {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      border-radius: 999px;
+      border: 1px solid var(--line);
+      background: rgba(255, 255, 255, 0.03);
+      color: var(--text);
+      padding: 7px 10px 7px 8px;
+      cursor: pointer;
+    }
+
+    .avatar {
+      width: 42px;
+      height: 42px;
+      border-radius: 50%;
+      display: grid;
+      place-items: center;
+      font-size: 21px;
+      border: 1px solid rgba(255, 255, 255, 0.14);
+      background: linear-gradient(145deg, rgba(215, 173, 99, 0.28), rgba(137, 217, 239, 0.16));
+    }
+
+    .profile-meta strong {
+      display: block;
+      font-size: 14px;
+    }
+
+    .profile-meta span {
+      display: block;
+      margin-top: 3px;
+      color: var(--muted);
+      font-size: 12px;
+    }
+
+    .profile-panel {
+      position: absolute;
+      top: calc(100% + 12px);
+      right: 0;
+      width: 320px;
+      padding: 18px;
+      border-radius: 22px;
+      border: 1px solid var(--line-strong);
+      background: rgba(12, 12, 12, 0.96);
+      box-shadow: var(--shadow);
+      display: none;
+    }
+
+    .profile-panel.open { display: block; }
+    .profile-panel h3 { margin: 0 0 12px; font-size: 16px; }
+    .profile-panel label { display: block; margin-bottom: 8px; color: var(--muted); font-size: 12px; }
+
+    .profile-panel input {
+      width: 100%;
+      height: 46px;
+      border-radius: 12px;
+      border: 1px solid var(--line);
+      background: rgba(255, 255, 255, 0.04);
+      color: var(--text);
+      padding: 0 14px;
+      outline: none;
+    }
+
+    .profile-panel input:focus,
+    .search-input:focus {
+      border-color: rgba(215, 173, 99, 0.7);
+      box-shadow: 0 0 0 3px rgba(215, 173, 99, 0.12);
+    }
+
+    .avatar-grid {
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap: 10px;
+      margin: 14px 0 18px;
+    }
+
+    .avatar-option {
+      width: 48px;
+      height: 48px;
+      border-radius: 50%;
+      border: 1px solid var(--line);
+      background: rgba(255, 255, 255, 0.03);
+      color: var(--text);
+      font-size: 22px;
+      cursor: pointer;
+      transition: 0.2s ease;
+    }
+
+    .avatar-option:hover,
+    .avatar-option.active {
+      border-color: rgba(215, 173, 99, 0.7);
+      background: rgba(215, 173, 99, 0.12);
+    }
+
+    .save-button {
+      height: 40px;
+      border: 0;
+      border-radius: 999px;
+      padding: 0 18px;
+      background: linear-gradient(135deg, #e6bf80, #c8884b);
+      color: #0f0c08;
+      font-weight: 800;
+      cursor: pointer;
+    }
+
+    .hero {
+      padding: 34px 28px 18px;
+      display: grid;
+      grid-template-columns: minmax(0, 1.25fr) minmax(320px, 410px);
+      gap: 24px;
+    }
+
+    .card {
+      border: 1px solid var(--line);
+      background: var(--panel);
+      box-shadow: var(--shadow);
+    }
+
+    .hero-card {
+      border-radius: 30px;
+      padding: 34px;
+      background: var(--hero), rgba(255, 255, 255, 0.03);
+      min-height: 430px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .hero-card::after {
+      content: "";
+      position: absolute;
+      width: 280px;
+      height: 280px;
+      border-radius: 50%;
+      right: -80px;
+      bottom: -120px;
+      background: radial-gradient(circle, rgba(215, 173, 99, 0.24), rgba(215, 173, 99, 0));
+    }
+
+    .hero-label {
+      display: inline-flex;
+      align-items: center;
+      min-height: 34px;
+      padding: 0 12px;
+      border-radius: 999px;
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      background: rgba(255, 255, 255, 0.04);
+      color: var(--muted);
+      font-size: 12px;
+      align-self: flex-start;
+    }
+
+    .hero h1 {
+      margin: 18px 0 10px;
+      font-family: "Baskerville", "Times New Roman", "STSong", serif;
+      font-size: clamp(40px, 5vw, 76px);
+      line-height: 0.95;
+      max-width: 760px;
+    }
+
+    .hero p {
+      margin: 0;
+      max-width: 660px;
+      color: var(--muted);
+      line-height: 1.72;
+      font-size: 16px;
+    }
+
+    .hero-stats {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 14px;
+      margin-top: 24px;
+    }
+
+    .stat-card {
+      min-height: 116px;
+      padding: 18px;
+      border-radius: 22px;
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      background: rgba(255, 255, 255, 0.04);
+    }
+
+    .stat-card strong {
+      display: block;
+      color: var(--gold);
+      font-size: 34px;
+      font-family: "Baskerville", "Times New Roman", serif;
+      margin-bottom: 10px;
+    }
+
+    .stat-card span {
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.5;
+    }
+
+    .side-card {
+      border-radius: 30px;
+      padding: 28px;
+      display: flex;
+      flex-direction: column;
+      gap: 18px;
+      background: radial-gradient(circle at top left, rgba(137, 217, 239, 0.13), transparent 30%), rgba(255, 255, 255, 0.03);
+    }
+
+    .side-card h2 {
+      margin: 0;
+      font-size: 28px;
+      line-height: 1.12;
+    }
+
+    .side-card p {
+      margin: 0;
+      color: var(--muted);
+      line-height: 1.7;
+    }
+
+    .bullet-list {
+      display: grid;
+      gap: 10px;
+    }
+
+    .bullet {
+      padding: 12px 14px;
+      border-radius: 16px;
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid rgba(255, 255, 255, 0.06);
+      color: var(--muted);
+      line-height: 1.5;
+      font-size: 13px;
+    }
+
+    .content {
+      padding: 18px 28px 42px;
+    }
+
+    .toolbar {
+      display: grid;
+      grid-template-columns: 1.2fr 0.8fr;
+      gap: 20px;
+      margin-bottom: 18px;
+    }
+
+    .search-panel,
+    .filters-panel,
+    .results-panel,
+    .detail-panel {
+      border-radius: 26px;
+      padding: 22px;
+    }
+
+    .search-panel h2,
+    .filters-panel h2 {
+      margin: 0 0 8px;
+      font-size: 18px;
+    }
+
+    .search-panel p,
+    .filters-panel p {
+      margin: 0 0 14px;
+      color: var(--muted);
+      font-size: 14px;
+      line-height: 1.6;
+    }
+
+    .search-input {
+      width: 100%;
+      height: 58px;
+      border-radius: 18px;
+      border: 1px solid rgba(255, 255, 255, 0.16);
+      background: #ffffff;
+      color: #131313;
+      padding: 0 18px;
+      font-size: 16px;
+      outline: none;
+    }
+
+    .suggestion-strip {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-top: 14px;
+    }
+
+    .suggestion {
+      min-height: 34px;
+      padding: 0 12px;
+      border-radius: 999px;
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      background: rgba(255, 255, 255, 0.04);
+      color: var(--muted);
+      cursor: pointer;
+    }
+
+    .filters-row,
+    .category-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-top: 10px;
+    }
+
+    .workspace {
+      display: grid;
+      grid-template-columns: minmax(290px, 360px) minmax(0, 1fr);
+      gap: 22px;
+      align-items: start;
+      min-height: 0;
+    }
+
+    .results-panel {
+      display: grid;
+      gap: 14px;
+      align-content: start;
+      max-height: calc(100svh - 128px);
+      overflow-y: auto;
+      overscroll-behavior: contain;
+      position: sticky;
+      top: 96px;
+      scrollbar-color: rgba(215, 173, 99, 0.55) rgba(255, 255, 255, 0.06);
+    }
+
+    .result-card {
+      border-radius: 22px;
+      overflow: hidden;
+      cursor: pointer;
+      transition: transform 0.2s ease, border-color 0.2s ease;
+    }
+
+    .result-card:hover,
+    .result-card.active {
+      transform: translateY(-3px);
+      border-color: rgba(215, 173, 99, 0.48);
+    }
+
+    .result-media {
+      position: relative;
+      height: 190px;
+      overflow: hidden;
+      background: #111;
+    }
+
+    .result-media img {
+      height: 100%;
+      object-fit: cover;
+    }
+
+    .result-body h3 {
+      margin: 0 0 6px;
+      font-size: 20px;
+    }
+
+    .result-body {
+      padding: 16px;
+    }
+
+    .result-body p {
+      margin: 0;
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.55;
+    }
+
+    .tags {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 12px;
+    }
+
+    .tag {
+      min-height: 28px;
+      padding: 0 10px;
+      border-radius: 999px;
+      display: inline-flex;
+      align-items: center;
+      background: rgba(255, 255, 255, 0.06);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      color: var(--muted);
+      font-size: 11px;
+    }
+
+    .detail-panel {
+      overflow-y: auto;
+      max-height: calc(100svh - 128px);
+      overscroll-behavior: contain;
+      position: sticky;
+      top: 96px;
+      background: rgba(255, 255, 255, 0.04);
+      scrollbar-color: rgba(137, 217, 239, 0.55) rgba(255, 255, 255, 0.06);
+    }
+
+    .detail-cover {
+      position: relative;
+      min-height: 360px;
+      border-radius: 24px;
+      overflow: hidden;
+      background: #0e0e0e;
+    }
+
+    .detail-cover img {
+      height: 360px;
+      object-fit: cover;
+    }
+
+    .detail-cover .overlay {
+      position: absolute;
+      inset: auto 0 0 0;
+      padding: 26px;
+      background: linear-gradient(180deg, rgba(0, 0, 0, 0), rgba(0, 0, 0, 0.84));
+    }
+
+    .detail-cover h3 {
+      margin: 0;
+      font-family: "Baskerville", "Times New Roman", "STSong", serif;
+      font-size: clamp(30px, 4vw, 46px);
+    }
+
+    .detail-cover p {
+      margin: 8px 0 0;
+      color: rgba(248, 247, 242, 0.78);
+    }
+
+    .detail-main {
+      padding-top: 22px;
+    }
+
+    .summary {
+      margin: 0 0 18px;
+      color: var(--muted);
+      line-height: 1.8;
+      font-size: 15px;
+    }
+
+    .detail-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 16px;
+      margin-bottom: 18px;
+    }
+
+    .info-box {
+      padding: 18px;
+      border-radius: 20px;
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid rgba(255, 255, 255, 0.06);
+    }
+
+    .info-box h4,
+    .section-title {
+      margin: 0 0 12px;
+      color: var(--gold);
+      font-size: 14px;
+      font-weight: 700;
+    }
+
+    .info-box dl {
+      margin: 0;
+      display: grid;
+      gap: 10px;
+    }
+
+    .info-box dt {
+      color: var(--muted);
+      font-size: 12px;
+      margin-bottom: 4px;
+    }
+
+    .info-box dd {
+      margin: 0;
+      font-size: 14px;
+      line-height: 1.55;
+    }
+
+    .gallery-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 16px;
+      margin-bottom: 18px;
+    }
+
+    .gallery-card {
+      border-radius: 20px;
+      overflow: hidden;
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid rgba(255, 255, 255, 0.06);
+    }
+
+    .gallery-card img {
+      height: 220px;
+      object-fit: cover;
+      background: #111;
+    }
+
+    .gallery-card figcaption {
+      padding: 14px;
+      color: var(--muted);
+      line-height: 1.65;
+      font-size: 12px;
+    }
+
+    .gallery-card b { color: var(--text); font-size: 13px; }
+    .gallery-card a,
+    .source-item a { color: var(--ice); }
+
+    .more-gallery-status {
+      margin: -2px 0 18px;
+      padding: 14px 16px;
+      border-radius: 16px;
+      border: 1px dashed rgba(255, 255, 255, 0.16);
+      background: rgba(255, 255, 255, 0.025);
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.6;
+    }
+
+    .source-list {
+      display: grid;
+      gap: 10px;
+    }
+
+    .source-item {
+      padding: 14px 16px;
+      border-radius: 16px;
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid rgba(255, 255, 255, 0.06);
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.65;
+    }
+
+    .empty {
+      padding: 26px;
+      border-radius: 20px;
+      border: 1px dashed rgba(255, 255, 255, 0.18);
+      background: rgba(255, 255, 255, 0.02);
+      color: var(--muted);
+    }
+
+    @media (max-width: 1120px) {
+      .hero,
+      .toolbar,
+      .workspace {
+        grid-template-columns: 1fr;
+      }
+
+      .results-panel,
+      .detail-panel {
+        position: static;
+        max-height: none;
+        overflow: visible;
+      }
+    }
+
+    @media (max-width: 760px) {
+      .topbar,
+      .hero,
+      .content {
+        padding-left: 16px;
+        padding-right: 16px;
+      }
+
+      .topbar {
+        gap: 14px;
+        flex-wrap: wrap;
+      }
+
+      .nav {
+        width: 100%;
+        order: 3;
+      }
+
+      .nav button { flex: 1; }
+
+      .hero-card,
+      .side-card,
+      .search-panel,
+      .filters-panel,
+      .results-panel,
+      .detail-panel {
+        border-radius: 22px;
+      }
+
+      .hero-card {
+        padding: 24px;
+        min-height: auto;
+      }
+
+      .hero-stats,
+      .detail-grid,
+      .gallery-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .profile-panel {
+        width: min(320px, calc(100vw - 32px));
+      }
+    }
+  </style>
+</head>
+<body>
+  <header class="topbar">
+    <div class="brand">
+      <div class="brand-mark">KS</div>
+      <div>
+        <h1 class="brand-title">快搜武器图鉴</h1>
+        <p class="brand-subtitle">终极版 · 更完整的军事武器资料库</p>
+      </div>
+    </div>
+
+    <nav class="nav">
+      <button class="nav-link active" data-target="heroSection">首页</button>
+      <button class="nav-link" data-target="searchSection">搜寻库</button>
+    </nav>
+
+    <div class="profile-wrap">
+      <button class="profile-trigger" id="profileTrigger">
+        <div class="avatar" id="navAvatar">🛡️</div>
+        <div class="profile-meta">
+          <strong id="navName">访客档案</strong>
+          <span>点击修改头像与名字</span>
+        </div>
+      </button>
+
+      <div class="profile-panel" id="profilePanel">
+        <h3>个人资料</h3>
+        <label for="nameInput">名字</label>
+        <input id="nameInput" type="text" maxlength="18" placeholder="输入你的名字">
+        <label style="margin-top: 14px;">头像</label>
+        <div class="avatar-grid" id="avatarGrid"></div>
+        <div style="display:flex;justify-content:flex-end;">
+          <button class="save-button" id="saveProfile">保存资料</button>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <section class="hero" id="heroSection">
+    <div class="hero-card card">
+      <div>
+        <div class="hero-label">你好欢迎来到快搜武器图鉴</div>
+        <h1>更完整的军事武器终极版。</h1>
+        <p>这次把重点放在“更大武器库”和“每个条目都尽量显示真实图片”两件事上。页面会从 Wikipedia / Wikimedia 拉取真实公开缩略图，加载成功后直接显示武器照片；兜底图只在网络或来源失败时出现。</p>
+      </div>
+
+      <div class="hero-stats">
+        <div class="stat-card"><strong id="totalWeapons">0</strong><span>当前收录武器条目</span></div>
+        <div class="stat-card"><strong id="totalCategories">0</strong><span>覆盖单兵、陆战、空中、海上、导弹</span></div>
+        <div class="stat-card"><strong id="totalImages">0</strong><span>每个条目优先显示真实公开图片，并保留来源说明</span></div>
+        <div class="stat-card"><strong id="totalSources">0</strong><span>保留官方、军方或公开资料来源</span></div>
+      </div>
+    </div>
+
+    <aside class="side-card card">
+      <h2 id="welcomeTitle">欢迎你，访客档案</h2>
+      <p>你可以先从首页浏览，也可以直接进入搜寻库。白色搜索框支持键盘输入，输入时结果会自动出现；点中某个武器后，右侧会展示中文资料、图片和来源。</p>
+      <div class="bullet-list">
+        <div class="bullet">图片显示策略：优先加载真实公开图片，只有网络失败时才显示备用图卡。</div>
+        <div class="bullet">搜索策略：支持中文名、英文名、别名、型号、国家和分类的模糊搜索。</div>
+        <div class="bullet">资料结构：每个条目都带基础资料、参数资料、图片资料和来源说明。</div>
+      </div>
+    </aside>
+  </section>
+
+  <main class="content" id="searchSection">
+    <section class="toolbar">
+      <div class="search-panel card">
+        <h2>搜寻库</h2>
+        <p>点一下下面的白色搜寻框，就可以直接用键盘输入武器名称、型号、国家或别名。</p>
+        <input class="search-input" id="searchInput" type="search" placeholder="请输入武器名称、型号、国家或别名">
+        <div class="suggestion-strip" id="suggestionStrip"></div>
+      </div>
+
+      <div class="filters-panel card">
+        <h2>筛选</h2>
+        <p>你可以按大类和资料等级快速缩小范围。</p>
+        <div class="category-row" id="categoryRow"></div>
+        <div class="filters-row" id="credibilityRow"></div>
+      </div>
+    </section>
+
+    <section class="workspace">
+      <div class="results-panel card" id="resultsPanel"></div>
+      <article class="detail-panel card" id="detailPanel"></article>
+    </section>
+  </main>
+
+  <script src="./weapons-data.js"></script>
+  <script>
+    const { weapons, avatars } = window.weaponAtlasData;
+    const categories = ["全部", ...new Set(weapons.map((item) => item.category))];
+    const credibilityOptions = [
+      { value: "all", label: "全部资料等级" },
+      { value: "A", label: "A 级资料" },
+      { value: "B", label: "B 级资料" },
+      { value: "C", label: "C 级资料" }
+    ];
+
+    const wikiTitles = {
+      "glock-17": "Glock 17",
+      "m1911": "M1911 pistol",
+      "beretta-92": "Beretta 92",
+      "desert-eagle": "Desert Eagle",
+      "ak-47": "AK-47",
+      "m16": "M16 rifle",
+      "hk416": "Heckler & Koch HK416",
+      "qbz-95": "QBZ-95",
+      "mp5": "Heckler & Koch MP5",
+      "p90": "FN P90",
+      "barrett-m82": "Barrett M82",
+      "rpg-7": "RPG-7",
+      "m1-abrams": "M1 Abrams",
+      "leopard-2": "Leopard 2",
+      "t-90": "T-90",
+      "type-99": "Type 99 tank",
+      "m2-bradley": "M2 Bradley",
+      "himars": "M142 HIMARS",
+      "f-16": "General Dynamics F-16 Fighting Falcon",
+      "f-22": "Lockheed Martin F-22 Raptor",
+      "f-35": "Lockheed Martin F-35 Lightning II",
+      "j-20": "Chengdu J-20",
+      "su-27": "Sukhoi Su-27",
+      "b-2": "Northrop Grumman B-2 Spirit",
+      "ah-64": "Boeing AH-64 Apache",
+      "mq-9": "General Atomics MQ-9 Reaper",
+      "nimitz": "Nimitz-class aircraft carrier",
+      "ford": "Gerald R. Ford-class aircraft carrier",
+      "arleigh-burke": "Arleigh Burke-class destroyer",
+      "type-055": "Type 055 destroyer",
+      "virginia": "Virginia-class submarine",
+      "tomahawk": "Tomahawk (missile)",
+      "aim-120": "AIM-120 AMRAAM",
+      "aim-9": "AIM-9 Sidewinder",
+      "javelin": "FGM-148 Javelin",
+      "patriot": "MIM-104 Patriot",
+      "exocet": "Exocet",
+      "df-21": "DF-21",
+      "t-14-armata": "T-14 Armata",
+      "challenger-2": "Challenger 2",
+      "merkava-mk4": "Merkava",
+      "eurofighter-typhoon": "Eurofighter Typhoon",
+      "rafale": "Dassault Rafale",
+      "su-57": "Sukhoi Su-57",
+      "bayraktar-tb2": "Bayraktar TB2",
+      "type-052d": "Type 052D destroyer",
+      "ohio-class": "Ohio-class submarine",
+      "s-400": "S-400 missile system",
+      "thaad": "Terminal High Altitude Area Defense",
+      "harpoon": "Harpoon (missile)",
+      "c-17": "Boeing C-17 Globemaster III",
+      "a-10": "Fairchild Republic A-10 Thunderbolt II",
+      "p-8": "Boeing P-8 Poseidon",
+      "ticonderoga": "Ticonderoga-class cruiser",
+      "seawolf": "Seawolf-class submarine",
+      "pzh-2000": "Panzerhaubitze 2000",
+      "type-10": "Type 10",
+      "iskander": "9K720 Iskander",
+      "f-15": "McDonnell Douglas F-15 Eagle",
+      "fa-18": "McDonnell Douglas F/A-18 Hornet",
+      "mig-29": "Mikoyan MiG-29",
+      "b-52": "Boeing B-52 Stratofortress",
+      "tu-160": "Tupolev Tu-160",
+      "uh-60": "Sikorsky UH-60 Black Hawk",
+      "mi-24": "Mil Mi-24",
+      "k2-black-panther": "K2 Black Panther",
+      "k9-thunder": "K9 Thunder",
+      "m270": "M270 Multiple Launch Rocket System",
+      "zumwalt": "Zumwalt-class destroyer",
+      "queen-elizabeth-class": "Queen Elizabeth-class aircraft carrier",
+      "j-10": "Chengdu J-10",
+      "j-16": "Shenyang J-16",
+      "y-20": "Xi'an Y-20",
+      "z-10": "CAIC Z-10",
+      "shandong-carrier": "Chinese aircraft carrier Shandong",
+    };
+
+    const wikiImageCache = new Map();
+    const commonsSearchCache = new Map();
+    const commonsGalleryCache = new Map();
+    const imageOverrides = {
+      "type-055": "https://commons.wikimedia.org/wiki/Special:Redirect/file/PLANS%20Nanchang%20(DDG-101)%2020210427.jpg?width=1400"
+    };
+
+    const state = {
+      query: "",
+      category: "全部",
+      credibility: "all",
+      selectedId: weapons[0]?.id,
+      profile: {
+        name: localStorage.getItem("weaponAtlasUltimateName") || "访客档案",
+        avatar: localStorage.getItem("weaponAtlasUltimateAvatar") || avatars[0]
+      }
+    };
+
+    const $ = (id) => document.getElementById(id);
+
+    function normalize(value) {
+      return String(value || "").toLowerCase().replace(/\s+/g, "");
+    }
+
+    function makeFallbackImage(title, subtitle) {
+      const icon = categoryIcon(subtitle);
+      const svg = `
+        <svg xmlns="http://www.w3.org/2000/svg" width="1200" height="800">
+          <defs>
+            <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+              <stop offset="0%" stop-color="#151515"/>
+              <stop offset="55%" stop-color="#0f0f0f"/>
+              <stop offset="100%" stop-color="#1f1a14"/>
+            </linearGradient>
+            <radialGradient id="glow" cx="75%" cy="20%" r="60%">
+              <stop offset="0%" stop-color="rgba(137,217,239,0.45)"/>
+              <stop offset="100%" stop-color="rgba(137,217,239,0)"/>
+            </radialGradient>
+          </defs>
+          <rect width="1200" height="800" fill="url(#bg)"/>
+          <rect width="1200" height="800" fill="url(#glow)"/>
+          <circle cx="180" cy="160" r="80" fill="rgba(215,173,99,0.18)"/>
+          <g transform="translate(700 160)" opacity="0.82">${icon}</g>
+          <rect x="70" y="540" width="1060" height="1" fill="rgba(255,255,255,0.12)"/>
+          <text x="70" y="190" fill="#d7ad63" font-size="30" font-family="PingFang SC, Microsoft YaHei, sans-serif">快搜武器图鉴 · 本地可见图</text>
+          <text x="70" y="330" fill="#f8f7f2" font-size="74" font-family="Baskerville, STSong, serif">${escapeSvg(title)}</text>
+          <text x="70" y="400" fill="#b9b0a0" font-size="34" font-family="PingFang SC, Microsoft YaHei, sans-serif">${escapeSvg(subtitle)}</text>
+          <text x="70" y="612" fill="#8fd9ef" font-size="25" font-family="PingFang SC, Microsoft YaHei, sans-serif">真实公开图片会在加载成功后自动替换；失败时这里也不会空白。</text>
+        </svg>`;
+      return "data:image/svg+xml;charset=utf-8," + encodeURIComponent(svg);
+    }
+
+    function categoryIcon(value) {
+      const text = String(value || "");
+      if (text.includes("空") || text.includes("飞机") || text.includes("战斗机") || text.includes("轰炸机") || text.includes("无人机") || text.includes("直升机")) {
+        return '<path d="M40 210 L430 70 L510 110 L300 260 L520 370 L440 420 L210 310 L80 390 L30 360 L120 260 Z" fill="none" stroke="#d7ad63" stroke-width="18" stroke-linejoin="round"/><path d="M260 245 L390 250" stroke="#8fd9ef" stroke-width="12" stroke-linecap="round"/>';
+      }
+      if (text.includes("舰") || text.includes("潜艇") || text.includes("海")) {
+        return '<path d="M50 340 L470 340 L540 270 L160 250 Z" fill="none" stroke="#d7ad63" stroke-width="18" stroke-linejoin="round"/><path d="M190 245 L230 145 L340 145 L380 250" fill="none" stroke="#8fd9ef" stroke-width="14" stroke-linejoin="round"/><path d="M80 405 C180 365 280 445 390 405 C455 382 505 388 555 405" fill="none" stroke="#d7ad63" stroke-width="14" stroke-linecap="round"/>';
+      }
+      if (text.includes("坦克") || text.includes("装甲") || text.includes("火炮") || text.includes("陆战")) {
+        return '<rect x="75" y="250" width="360" height="110" rx="28" fill="none" stroke="#d7ad63" stroke-width="18"/><path d="M260 250 L315 185 L420 185 L455 250" fill="none" stroke="#8fd9ef" stroke-width="16" stroke-linejoin="round"/><path d="M430 220 L565 185" stroke="#d7ad63" stroke-width="16" stroke-linecap="round"/><circle cx="150" cy="385" r="32" fill="none" stroke="#d7ad63" stroke-width="14"/><circle cx="245" cy="385" r="32" fill="none" stroke="#d7ad63" stroke-width="14"/><circle cx="340" cy="385" r="32" fill="none" stroke="#d7ad63" stroke-width="14"/>';
+      }
+      if (text.includes("导弹") || text.includes("弹药") || text.includes("火箭")) {
+        return '<path d="M95 360 L415 120 C468 160 500 205 520 270 L200 510 L160 430 Z" fill="none" stroke="#d7ad63" stroke-width="18" stroke-linejoin="round"/><path d="M390 145 L520 90 L485 235" fill="none" stroke="#8fd9ef" stroke-width="15" stroke-linejoin="round"/><path d="M185 438 L90 500 M225 478 L160 575" stroke="#d7ad63" stroke-width="16" stroke-linecap="round"/>';
+      }
+      return '<path d="M70 310 L500 210 L535 255 L120 380 Z" fill="none" stroke="#d7ad63" stroke-width="18" stroke-linejoin="round"/><path d="M175 365 L130 455 L205 455 L255 345" fill="none" stroke="#8fd9ef" stroke-width="15" stroke-linejoin="round"/><path d="M365 242 L430 180" stroke="#d7ad63" stroke-width="16" stroke-linecap="round"/>';
+    }
+
+    function escapeSvg(value) {
+      return String(value).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+    }
+
+    async function fetchJsonWithTimeout(url, timeout = 4500) {
+      const controller = new AbortController();
+      const timer = window.setTimeout(() => controller.abort(), timeout);
+      try {
+        const response = await fetch(url, { signal: controller.signal });
+        return response.ok ? response.json() : null;
+      } catch (error) {
+        return null;
+      } finally {
+        window.clearTimeout(timer);
+      }
+    }
+
+    async function getWikipediaImage(weaponId) {
+      if (wikiImageCache.has(weaponId)) return wikiImageCache.get(weaponId);
+      const title = wikiTitles[weaponId];
+      if (!title) return null;
+
+      const promise = fetchJsonWithTimeout(`https://en.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(title)}`)
+        .then((data) => {
+          const image = data?.originalimage?.source || data?.thumbnail?.source || null;
+          return image ? image.replace(/\/\d+px-/, "/1200px-") : null;
+        })
+        .catch(() => null);
+
+      wikiImageCache.set(weaponId, promise);
+      return promise;
+    }
+
+    async function getCommonsSearchImage(query) {
+      const cleanQuery = String(query || "").trim();
+      if (!cleanQuery) return null;
+      if (commonsSearchCache.has(cleanQuery)) return commonsSearchCache.get(cleanQuery);
+
+      const params = new URLSearchParams({
+        action: "query",
+        generator: "search",
+        gsrsearch: cleanQuery,
+        gsrnamespace: "6",
+        gsrlimit: "10",
+        prop: "imageinfo",
+        iiprop: "url|mime",
+        iiurlwidth: "1200",
+        format: "json",
+        origin: "*"
+      });
+
+      const promise = fetchJsonWithTimeout(`https://commons.wikimedia.org/w/api.php?${params.toString()}`)
+        .then((data) => {
+          const pages = Object.values(data?.query?.pages || {});
+          const usable = pages
+            .map((page) => page.imageinfo?.[0])
+            .filter((info) => info && /^image\/(jpeg|png|webp)$/i.test(info.mime || ""));
+          return usable[0]?.thumburl || usable[0]?.url || null;
+        })
+        .catch(() => null);
+
+      commonsSearchCache.set(cleanQuery, promise);
+      return promise;
+    }
+
+    async function getCommonsGalleryImages(weapon) {
+      const query = wikiTitles[weapon.id] || weapon.nameEn || weapon.nameZh;
+      if (commonsGalleryCache.has(query)) return commonsGalleryCache.get(query);
+
+      const params = new URLSearchParams({
+        action: "query",
+        generator: "search",
+        gsrsearch: query,
+        gsrnamespace: "6",
+        gsrlimit: "18",
+        prop: "imageinfo",
+        iiprop: "url|mime",
+        iiurlwidth: "1200",
+        format: "json",
+        origin: "*"
+      });
+
+      const promise = fetchJsonWithTimeout(`https://commons.wikimedia.org/w/api.php?${params.toString()}`)
+        .then((data) => {
+          const pages = Object.values(data?.query?.pages || {});
+          const seen = new Set(weapon.images.map((image) => image.url));
+          return pages
+            .map((page) => ({ title: page.title, info: page.imageinfo?.[0] }))
+            .filter((item) => item.info && /^image\/(jpeg|png|webp)$/i.test(item.info.mime || ""))
+            .map((item) => ({
+              title: item.title.replace(/^File:/, ""),
+              thumb: item.info.thumburl || item.info.url,
+              page: `https://commons.wikimedia.org/wiki/${encodeURIComponent(item.title).replace(/%3A/g, ":")}`
+            }))
+            .filter((item) => item.thumb && !seen.has(item.thumb))
+            .slice(0, 6);
+        })
+        .catch(() => []);
+
+      commonsGalleryCache.set(query, promise);
+      return promise;
+    }
+
+    async function attachRealImage(img) {
+      const weaponId = img.dataset.weaponId;
+      const directSrc = img.dataset.realSrc;
+      const searchQuery = img.dataset.imageQuery || wikiTitles[weaponId] || img.dataset.title;
+      const wikiSrc = await getWikipediaImage(weaponId);
+      const commonsSrc = await getCommonsSearchImage(searchQuery);
+      const candidates = [imageOverrides[weaponId], wikiSrc, commonsSrc, directSrc].filter(Boolean);
+
+      for (const src of candidates) {
+        const ok = await testImage(src);
+        if (ok) {
+          img.src = src;
+          img.classList.add("real-loaded");
+          return;
+        }
+      }
+    }
+
+    function testImage(src) {
+      return new Promise((resolve) => {
+        const probe = new Image();
+        const timer = window.setTimeout(() => {
+          probe.onload = null;
+          probe.onerror = null;
+          resolve(false);
+        }, 6000);
+        probe.onload = () => {
+          window.clearTimeout(timer);
+          resolve(true);
+        };
+        probe.onerror = () => {
+          window.clearTimeout(timer);
+          resolve(false);
+        };
+        probe.src = src;
+      });
+    }
+
+    function scoreWeapon(weapon, query) {
+      const q = normalize(query);
+      if (!q) return 1;
+      const fields = [
+        weapon.nameZh,
+        weapon.nameEn,
+        weapon.category,
+        weapon.subCategory,
+        weapon.country,
+        weapon.maker,
+        ...weapon.aliases
+      ].map(normalize);
+
+      let score = 0;
+      for (const field of fields) {
+        if (field === q) score += 120;
+        else if (field.startsWith(q)) score += 60;
+        else if (field.includes(q)) score += 34;
+        else {
+          let index = 0;
+          let hits = 0;
+          for (const char of q) {
+            const next = field.indexOf(char, index);
+            if (next >= 0) {
+              hits += 1;
+              index = next + 1;
+            }
+          }
+          if (q.length > 1 && hits / q.length >= 0.72) score += 12;
+        }
+      }
+      return score;
+    }
+
+    function filteredWeapons() {
+      return weapons
+        .map((weapon) => ({ weapon, score: scoreWeapon(weapon, state.query) }))
+        .filter((item) => item.score > 0)
+        .filter((item) => state.category === "全部" || item.weapon.category === state.category)
+        .filter((item) => state.credibility === "all" || item.weapon.credibility === state.credibility)
+        .sort((a, b) => b.score - a.score || a.weapon.nameZh.localeCompare(b.weapon.nameZh))
+        .map((item) => item.weapon);
+    }
+
+    function renderStats() {
+      $("totalWeapons").textContent = weapons.length;
+      $("totalCategories").textContent = categories.length - 1;
+      $("totalImages").textContent = weapons.reduce((sum, weapon) => sum + weapon.images.length, 0);
+      $("totalSources").textContent = weapons.reduce((sum, weapon) => sum + weapon.sources.length, 0);
+    }
+
+    function renderProfile() {
+      $("navAvatar").textContent = state.profile.avatar;
+      $("navName").textContent = state.profile.name;
+      $("welcomeTitle").textContent = `欢迎你，${state.profile.name}`;
+      $("nameInput").value = state.profile.name;
+      $("avatarGrid").innerHTML = avatars.map((avatar) => `
+        <button class="avatar-option ${avatar === state.profile.avatar ? "active" : ""}" data-avatar="${avatar}">${avatar}</button>
+      `).join("");
+
+      document.querySelectorAll(".avatar-option").forEach((button) => {
+        button.addEventListener("click", () => {
+          state.profile.avatar = button.dataset.avatar;
+          renderProfile();
+        });
+      });
+    }
+
+    function renderCategories() {
+      $("categoryRow").innerHTML = categories.map((category) => `
+        <button class="category-pill ${category === state.category ? "active" : ""}" data-category="${category}">${category}</button>
+      `).join("");
+      document.querySelectorAll(".category-pill").forEach((button) => {
+        button.addEventListener("click", () => {
+          state.category = button.dataset.category;
+          renderWorkspace();
+        });
+      });
+    }
+
+    function renderCredibility() {
+      $("credibilityRow").innerHTML = credibilityOptions.map((item) => `
+        <button class="filter-pill ${item.value === state.credibility ? "active" : ""}" data-credibility="${item.value}">${item.label}</button>
+      `).join("");
+      document.querySelectorAll(".filter-pill").forEach((button) => {
+        button.addEventListener("click", () => {
+          state.credibility = button.dataset.credibility;
+          renderWorkspace();
+        });
+      });
+    }
+
+    function renderSuggestions() {
+      const picks = ["歼-20", "歼-10", "歼-16", "运-20", "直-10", "山东舰", "055", "格洛克", "F-35", "战斧"];
+      $("suggestionStrip").innerHTML = picks.map((item) => `
+        <button class="suggestion" data-suggestion="${item}">${item}</button>
+      `).join("");
+      document.querySelectorAll(".suggestion").forEach((button) => {
+        button.addEventListener("click", () => {
+          state.query = button.dataset.suggestion;
+          $("searchInput").value = state.query;
+          renderWorkspace();
+        });
+      });
+    }
+
+    function renderResults(list) {
+      if (!list.length) {
+        $("resultsPanel").innerHTML = `<div class="empty">没有搜到匹配资料。你可以试试更短的关键词，比如“格洛克”“伯克”“战斧”“F-35”“爱国者”。</div>`;
+        $("detailPanel").innerHTML = `<div class="empty">当前没有可展示的武器资料。</div>`;
+        return;
+      }
+
+      if (!list.some((weapon) => weapon.id === state.selectedId)) {
+        state.selectedId = list[0].id;
+      }
+
+      $("resultsPanel").innerHTML = list.map((weapon) => `
+        <button class="result-card card ${weapon.id === state.selectedId ? "active" : ""}" data-id="${weapon.id}">
+          <div class="result-media">
+            <img src="${makeFallbackImage(weapon.nameZh, weapon.subCategory)}" data-weapon-id="${weapon.id}" data-image-query="${wikiTitles[weapon.id] || weapon.nameEn}" data-real-src="${weapon.images[0].url}" alt="${weapon.nameZh}" data-title="${weapon.nameZh}" data-subtitle="${weapon.subCategory}">
+          </div>
+          <div class="result-body">
+            <h3>${weapon.nameZh}</h3>
+            <p>${weapon.subCategory} · ${weapon.country}</p>
+            <div class="tags">
+              <span class="tag">${weapon.category}</span>
+              <span class="tag">${weapon.credibility} 级资料</span>
+              <span class="tag">${weapon.status}</span>
+            </div>
+          </div>
+        </button>
+      `).join("");
+
+      document.querySelectorAll("#resultsPanel .result-card").forEach((button) => {
+        button.addEventListener("click", () => {
+          state.selectedId = button.dataset.id;
+          renderWorkspace();
+        });
+      });
+    }
+
+    function renderDetail(list) {
+      const weapon = list.find((item) => item.id === state.selectedId) || list[0];
+      if (!weapon) return;
+
+      const basic = Object.entries(weapon.basic).map(([key, value]) => `
+        <div><dt>${key}</dt><dd>${value}</dd></div>
+      `).join("");
+
+      const specs = Object.entries(weapon.specs).map(([key, value]) => `
+        <div><dt>${key}</dt><dd>${value}</dd></div>
+      `).join("");
+
+      $("detailPanel").innerHTML = `
+        <div class="detail-cover">
+          <img src="${makeFallbackImage(weapon.nameZh, weapon.category)}" data-weapon-id="${weapon.id}" data-image-query="${wikiTitles[weapon.id] || weapon.nameEn}" data-real-src="${weapon.images[0].url}" alt="${weapon.nameZh}" data-title="${weapon.nameZh}" data-subtitle="${weapon.category}">
+          <div class="overlay">
+            <h3>${weapon.nameZh}</h3>
+            <p>${weapon.nameEn} · ${weapon.category} / ${weapon.subCategory}</p>
+          </div>
+        </div>
+
+        <div class="detail-main">
+          <p class="summary">${weapon.summary}</p>
+
+          <div class="detail-grid">
+            <section class="info-box">
+              <h4>基础资料</h4>
+              <dl>${basic}</dl>
+            </section>
+            <section class="info-box">
+              <h4>参数资料</h4>
+              <dl>${specs}</dl>
+            </section>
+          </div>
+
+          <section>
+            <h4 class="section-title">图片资料</h4>
+            <div class="gallery-grid">
+              ${weapon.images.map((image) => `
+                <figure class="gallery-card">
+                  <img src="${makeFallbackImage(weapon.nameZh, image.caption)}" data-weapon-id="${weapon.id}" data-image-query="${(wikiTitles[weapon.id] || weapon.nameEn) + " " + image.caption}" data-real-src="${image.url}" alt="${image.caption}" data-title="${weapon.nameZh}" data-subtitle="${image.caption}">
+                  <figcaption>
+                    <b>${image.caption}</b><br>
+                    来源名称：<a href="${image.sourceUrl}" target="_blank" rel="noreferrer">${image.sourceName}</a><br>
+                    来源级别：${image.sourceLevel}<br>
+                    授权 / 使用说明：${image.license}
+                  </figcaption>
+                </figure>
+              `).join("")}
+            </div>
+          </section>
+
+          <section>
+            <h4 class="section-title">更多真实图片</h4>
+            <div id="moreImages" class="more-gallery-status">正在从 Wikimedia Commons 加载更多真实公开图片...</div>
+          </section>
+
+          <section>
+            <h4 class="section-title">资料来源</h4>
+            <div class="source-list">
+              ${weapon.sources.map((item) => `
+                <div class="source-item">
+                  <a href="${item.url}" target="_blank" rel="noreferrer">${item.name}</a><br>
+                  来源级别：${item.level}
+                </div>
+              `).join("")}
+            </div>
+          </section>
+        </div>
+      `;
+
+      renderMoreImages(weapon);
+    }
+
+    async function renderMoreImages(weapon) {
+      const container = $("moreImages");
+      if (!container) return;
+      const images = await getCommonsGalleryImages(weapon);
+
+      if (!container || state.selectedId !== weapon.id) return;
+      if (!images.length) {
+        container.textContent = "暂时没有抓到更多可用的真实公开图片。";
+        return;
+      }
+
+      container.className = "gallery-grid";
+      container.innerHTML = images.map((image) => `
+        <figure class="gallery-card">
+          <img src="${image.thumb}" alt="${image.title}" loading="lazy">
+          <figcaption>
+            <b>${image.title}</b><br>
+            来源名称：<a href="${image.page}" target="_blank" rel="noreferrer">Wikimedia Commons</a><br>
+            来源级别：公开图片库<br>
+            授权 / 使用说明：按 Wikimedia Commons 文件页授权说明
+          </figcaption>
+        </figure>
+      `).join("");
+    }
+
+    function wireImageFallbacks() {
+      document.querySelectorAll("img[data-title]").forEach((img) => {
+        attachRealImage(img);
+      });
+    }
+
+    function renderWorkspace() {
+      renderCategories();
+      renderCredibility();
+      const list = filteredWeapons();
+      renderResults(list);
+      renderDetail(list);
+      wireImageFallbacks();
+    }
+
+    function saveProfile() {
+      state.profile.name = $("nameInput").value.trim() || "访客档案";
+      localStorage.setItem("weaponAtlasUltimateName", state.profile.name);
+      localStorage.setItem("weaponAtlasUltimateAvatar", state.profile.avatar);
+      $("profilePanel").classList.remove("open");
+      renderProfile();
+    }
+
+    function bindEvents() {
+      $("searchInput").addEventListener("input", (event) => {
+        state.query = event.target.value;
+        renderWorkspace();
+      });
+
+      $("profileTrigger").addEventListener("click", () => {
+        $("profilePanel").classList.toggle("open");
+      });
+
+      $("saveProfile").addEventListener("click", saveProfile);
+
+      document.addEventListener("click", (event) => {
+        if (!event.target.closest(".profile-wrap")) {
+          $("profilePanel").classList.remove("open");
+        }
+      });
+
+      document.querySelectorAll(".nav-link").forEach((button) => {
+        button.addEventListener("click", () => {
+          document.querySelectorAll(".nav-link").forEach((item) => item.classList.remove("active"));
+          button.classList.add("active");
+          const section = $(button.dataset.target);
+          section.scrollIntoView({ behavior: "smooth", block: "start" });
+        });
+      });
+    }
+
+    renderStats();
+    renderProfile();
+    renderSuggestions();
+    renderWorkspace();
+    bindEvents();
+  </script>
+</body>
+</html>
