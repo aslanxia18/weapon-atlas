@@ -1074,11 +1074,26 @@
       const weaponId = img.dataset.weaponId;
       const directSrc = img.dataset.realSrc;
       const searchQuery = img.dataset.imageQuery || wikiTitles[weaponId] || img.dataset.title;
-      const wikiSrc = await getWikipediaImage(weaponId);
-      const commonsSrc = await getCommonsSearchImage(searchQuery);
-      const candidates = [imageOverrides[weaponId], wikiSrc, commonsSrc, directSrc].filter(Boolean);
+      const fallbackSrc = makeFallbackImage(img.dataset.title, img.dataset.subtitle);
+      let usedFallback = false;
+
+      img.onerror = () => {
+        if (usedFallback) return;
+        usedFallback = true;
+        img.src = fallbackSrc;
+      };
+
+      const [wikiSrc, commonsSrc] = await Promise.all([
+        getWikipediaImage(weaponId),
+        getCommonsSearchImage(searchQuery)
+      ]);
+      const candidates = [imageOverrides[weaponId], directSrc, wikiSrc, commonsSrc].filter(Boolean);
 
       for (const src of candidates) {
+        if ((img.currentSrc === src || img.src === src) && img.complete && img.naturalWidth > 0) {
+          img.classList.add("real-loaded");
+          return;
+        }
         const ok = await testImage(src);
         if (ok) {
           img.src = src;
@@ -1228,7 +1243,7 @@
       $("resultsPanel").innerHTML = list.map((weapon) => `
         <button class="result-card card ${weapon.id === state.selectedId ? "active" : ""}" data-id="${weapon.id}">
           <div class="result-media">
-            <img src="${makeFallbackImage(weapon.nameZh, weapon.subCategory)}" data-weapon-id="${weapon.id}" data-image-query="${wikiTitles[weapon.id] || weapon.nameEn}" data-real-src="${weapon.images[0].url}" alt="${weapon.nameZh}" data-title="${weapon.nameZh}" data-subtitle="${weapon.subCategory}">
+            <img src="${imageOverrides[weapon.id] || weapon.images[0].url}" data-weapon-id="${weapon.id}" data-image-query="${wikiTitles[weapon.id] || weapon.nameEn}" data-real-src="${imageOverrides[weapon.id] || weapon.images[0].url}" alt="${weapon.nameZh}" data-title="${weapon.nameZh}" data-subtitle="${weapon.subCategory}">
           </div>
           <div class="result-body">
             <h3>${weapon.nameZh}</h3>
@@ -1264,7 +1279,7 @@
 
       $("detailPanel").innerHTML = `
         <div class="detail-cover">
-          <img src="${makeFallbackImage(weapon.nameZh, weapon.category)}" data-weapon-id="${weapon.id}" data-image-query="${wikiTitles[weapon.id] || weapon.nameEn}" data-real-src="${weapon.images[0].url}" alt="${weapon.nameZh}" data-title="${weapon.nameZh}" data-subtitle="${weapon.category}">
+          <img src="${imageOverrides[weapon.id] || weapon.images[0].url}" data-weapon-id="${weapon.id}" data-image-query="${wikiTitles[weapon.id] || weapon.nameEn}" data-real-src="${imageOverrides[weapon.id] || weapon.images[0].url}" alt="${weapon.nameZh}" data-title="${weapon.nameZh}" data-subtitle="${weapon.category}">
           <div class="overlay">
             <h3>${weapon.nameZh}</h3>
             <p>${weapon.nameEn} · ${weapon.category} / ${weapon.subCategory}</p>
@@ -1290,7 +1305,7 @@
             <div class="gallery-grid">
               ${weapon.images.map((image) => `
                 <figure class="gallery-card">
-                  <img src="${makeFallbackImage(weapon.nameZh, image.caption)}" data-weapon-id="${weapon.id}" data-image-query="${(wikiTitles[weapon.id] || weapon.nameEn) + " " + image.caption}" data-real-src="${image.url}" alt="${image.caption}" data-title="${weapon.nameZh}" data-subtitle="${image.caption}">
+                  <img src="${image.url}" data-weapon-id="${weapon.id}" data-image-query="${(wikiTitles[weapon.id] || weapon.nameEn) + " " + image.caption}" data-real-src="${image.url}" alt="${image.caption}" data-title="${weapon.nameZh}" data-subtitle="${image.caption}">
                   <figcaption>
                     <b>${image.caption}</b><br>
                     来源名称：<a href="${image.sourceUrl}" target="_blank" rel="noreferrer">${image.sourceName}</a><br>
